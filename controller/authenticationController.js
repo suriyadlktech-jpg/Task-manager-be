@@ -78,7 +78,7 @@ exports.login = async (req, res) => {
     // Generate JWT
     const token = jwt.sign(
       { userId: user._id, role: user.role },
-      process.env.JWT_SECRET,
+      process.env.SECRET_KEY,
       { expiresIn: "1d" }
     );
 
@@ -103,7 +103,7 @@ exports.login = async (req, res) => {
 
 exports.logout = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.id;
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });

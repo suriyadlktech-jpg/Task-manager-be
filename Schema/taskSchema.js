@@ -5,11 +5,11 @@ const TaskSchema = new mongoose.Schema(
   {
     task_title: { type: String, required: true, trim: true },
     task_description: { type: String, trim: true },
-    assigned_to: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // single user
+    assigned_to: { type: mongoose.Schema.Types.ObjectId, ref: "User"}, // single user
     status: {
       type: String,
-      enum: ["unassigned", "Accepted", "Rejected", "In Progress", "Completed"],
-      default: "unassigned",
+      enum: ["Assigned", "Accepted", "Rejected", "In-Progress", "Completed"],
+      default: "Assigned",
     },
     priority: {
       type: String,

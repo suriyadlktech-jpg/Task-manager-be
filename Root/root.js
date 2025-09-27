@@ -22,6 +22,8 @@ const{
     getAllUsers,
     getDashboardStats,
     getTasks,
+    deleteUser,
+    getRecentTasks,
 } = require("../controller/adminController");
 
 const { getUserAssignedTasks ,
@@ -32,7 +34,7 @@ const { getUserAssignedTasks ,
 
 // ====== Auth Routes ====== //
 router.post('/register',upload.single("file"),register);
-router.post('/login', login);
+router.post('/login',login);
 
 
 //==========User Routes =========//
@@ -44,9 +46,11 @@ router.post('/login', login);
 
 
  // ========= Admin Routes ========//
-router.post("/amin/create/task",auth,createTask);
+router.post("/admin/create/task",auth,upload.array("attachments"),createTask);
 router.get("/admin/get/alltask",auth,getTasks);
-router.get("/admin/get/allUsers",auth,getAllUsers);
+router.get("/admin/get/allUsers",getAllUsers);
+router.delete("/admin/delete/user/:userId",auth,deleteUser);
 router.get("/admin/dashboard/stats",auth,getDashboardStats);
+router.get("/admin/recent/tasks",auth,getRecentTasks);
 
 module.exports = router;

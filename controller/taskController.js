@@ -16,9 +16,9 @@ exports.createTask = async (req, res) => {
       notes,
       attachments,
     } = req.body;
-
+   console.log(assigned_to)
     const created_by = req.id;
-
+   
     // ✅ Validate assigned user
     if (!assigned_to) {
       return res.status(400).json({ message: "Task must be assigned to a user" });
@@ -86,23 +86,25 @@ exports.updateUserTaskStatus = async (req, res) => {
     if (!task) return res.status(404).json({ message: "Task not found" });
 
     // Check if the current user is assigned
-    if (task.assigned_to.toString() !== userId) {
+    if (task.assigned_to?.toString() !== userId) {
       return res.status(403).json({ message: "You are not assigned to this task" });
     }
 
     // Update task status
     task.status = status;
 
-    // If task is completed, free the user
+    // If task is completed, unassign user and update user's task_status
     if (status === "Completed") {
-      task.assigned_to = null; // unassign user from task
+      task.assigned_to = null; // unassign task
+
       const user = await User.findById(userId);
       if (user) {
-        user.task_status = "Unassigned";
+        user.task_status = "Completed"; // mark user as unassigned
         await user.save();
       }
     }
 
+    // Save task once
     await task.save();
 
     res.status(200).json({ message: `Task status updated to ${status}`, task });
