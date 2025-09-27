@@ -123,47 +123,6 @@ exports.updateUserTaskStatus = async (req, res) => {
 
 
 
-exports.getUserTasks = async (req, res) => {
-  try {
-    const userId = req.user.userId;
-    const role = req.user.role;
-
-    let tasks;
-
-    if (role === "admin") {
-      // Admin sees all tasks
-      tasks = await Task.find().populate("assigned_to", "username email profile_pic");
-    } else {
-      // Regular user: only tasks where they are assigned
-      tasks = await Task.find({ assigned_to: userId }).populate(
-        "assigned_to",
-        "username email profile_pic"
-      );
-    }
-
-    // Map tasks to include priority dynamically and user-specific info
-    const updatedTasks = tasks.map((task) => {
-      return {
-        ...task.toObject(),
-        priority: calculatePriority(task.createdAt, task.due_date),
-        user_status: task.status, // current status for this user
-        assigned_to: task.assigned_to
-          ? {
-              userId: task.assigned_to._id,
-              username: task.assigned_to.username,
-              email: task.assigned_to.email,
-              profile_pic: task.assigned_to.profile_pic,
-            }
-          : null, // if task unassigned
-      };
-    });
-
-    res.status(200).json(updatedTasks);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error", error: err.message });
-  }
-};
 
 
 

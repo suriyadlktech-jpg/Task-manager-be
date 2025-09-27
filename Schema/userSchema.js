@@ -41,8 +41,17 @@ const UserSchema = new mongoose.Schema(
       enum: ["Assigned", "Unassigned"],
       default: "Unassigned", // default value
     },
+    activeStatus: {
+      type: String,
+      enum: ["Active", "Inactive"],
+      default: "Inactive", // updated on login/logout
+    },
+    lastLogin: {
+      type: Date, // store last active date
+      default: null,
+    },
   },
-  { timestamps: true }
+  { timestamps: true } // includes createdAt (used as joinDate)
 );
 
 // Explicit collection name

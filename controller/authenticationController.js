@@ -60,41 +60,60 @@ exports.register = async (req, res) => {
 
 
 
-
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user by email
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(401).json({ message: "Invalid email" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Compare password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid password" });
-    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
-    // Generate JWT token
+    // Update active status and last login
+    user.activeStatus = "Active";
+    user.lastLogin = new Date();
+    await user.save();
+
+    // Generate JWT
     const token = jwt.sign(
       { userId: user._id, role: user.role },
-      process.env.SECRET_KEY,
-      { expiresIn: "1h" }
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
     );
 
-    // Respond with token and user info
-    return res.status(200).json({
+    res.status(200).json({
+      message: "Login successful",
       token,
       user: {
-        userId: user._id,
+        id: user._id,
         username: user.username,
+        email: user.email,
         role: user.role,
+        activeStatus: user.activeStatus,
+        lastLogin: user.lastLogin,
       },
     });
   } catch (err) {
-    console.error("Login error:", err);
-    return res.status(500).json({ message: "Server error. Please try again." });
+    console.error(err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+
+exports.logout = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.activeStatus = "Inactive";
+    await user.save();
+
+    res.status(200).json({ message: "Logout successful" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };

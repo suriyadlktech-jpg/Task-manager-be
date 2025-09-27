@@ -2,8 +2,7 @@ const cron = require("node-cron");
 const Task = require("../Schema/taskSchema");
 const User = require("../Schema/userSchema");
 const calculatePriority = require("../Helper/calculateDate");
-const sendMail = require("../utils/sendMail"); 
-
+const sendMail = require("../utils/sendMail");
 
 cron.schedule("*/5 * * * *", async () => {
   try {
